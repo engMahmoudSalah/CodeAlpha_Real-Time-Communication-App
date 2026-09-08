@@ -1,0 +1,12 @@
+{
+  "name": "Meetly",
+  "description": "Meetly is a secure, high-performance video conferencing and collaboration platform with peer-to-peer WebRTC mesh, encrypted room chats, interactive whiteboard, and instant file sharing.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "display-capture"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

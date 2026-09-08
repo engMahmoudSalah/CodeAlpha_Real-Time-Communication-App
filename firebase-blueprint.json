@@ -1,0 +1,89 @@
+{
+  "entities": {
+    "users": {
+      "title": "Users",
+      "description": "User profiles and preferences",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "avatarColor": { "type": "string" },
+        "isGuest": { "type": "boolean" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "name", "email", "avatarColor", "isGuest", "createdAt"]
+    },
+    "rooms": {
+      "title": "Conference Rooms",
+      "description": "Active or scheduled meeting rooms",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "isProtected": { "type": "boolean" },
+        "createdAt": { "type": "number" },
+        "lastActiveAt": { "type": "number" }
+      },
+      "required": ["id", "name", "createdBy", "createdAt"]
+    },
+    "rooms/{roomId}/messages": {
+      "title": "Chat Messages",
+      "description": "Real-time encrypted meeting chat messages",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "roomId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "avatarColor": { "type": "string" },
+        "text": { "type": "string" },
+        "isEncrypted": { "type": "boolean" },
+        "iv": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "roomId", "senderId", "senderName", "text", "timestamp"]
+    },
+    "rooms/{roomId}/files": {
+      "title": "Shared Files",
+      "description": "P2P shared files index in the conference room",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "roomId": { "type": "string" },
+        "name": { "type": "string" },
+        "size": { "type": "number" },
+        "type": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "isEncrypted": { "type": "boolean" },
+        "iv": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "roomId", "name", "size", "type", "senderId", "senderName", "timestamp"]
+    },
+    "rooms/{roomId}/whiteboard": {
+      "title": "Whiteboard Actions",
+      "description": "Collaborative drawing actions and whiteboard strokes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "color": { "type": "string" },
+        "size": { "type": "number" },
+        "points": { "type": "array" },
+        "text": { "type": "string" },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "type", "color", "size", "userId", "userName", "timestamp"]
+    }
+  }
+}

@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Architectural precision grid backgrounds */
+.bg-tech-grid-dark {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.bg-tech-grid-light {
+  background-image: 
+    linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.mask-radial {
+  mask-image: radial-gradient(ellipse at 50% 30%, black 40%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 40%, transparent 85%);
+}
+
+@keyframes flyUp {
+  0% {
+    transform: translateY(0) scale(0.7);
+    opacity: 0;
+  }
+  15% {
+    transform: translateY(-40px) scale(1.1);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-280px) scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-380px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.animate-fly-up {
+  animation: flyUp 2.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}

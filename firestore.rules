@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // User profile documents
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (request.auth.uid == userId || resource == null);
+    }
+
+    // Conference room documents
+    match /rooms/{roomId} {
+      allow read, list: if true;
+      allow create: if true;
+      allow update, delete: if isAuthenticated();
+
+      // Subcollection: Chat messages in a room
+      match /messages/{messageId} {
+        allow read: if true;
+        allow create: if true;
+        allow update, delete: if isAuthenticated();
+      }
+
+      // Subcollection: Shared files metadata in a room
+      match /files/{fileId} {
+        allow read: if true;
+        allow create: if true;
+        allow update, delete: if isAuthenticated();
+      }
+
+      // Subcollection: Whiteboard strokes
+      match /whiteboard/{actionId} {
+        allow read: if true;
+        allow create: if true;
+        allow update, delete: if true;
+      }
+    }
+  }
+}
