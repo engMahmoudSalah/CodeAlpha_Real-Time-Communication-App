@@ -298,11 +298,11 @@ meetly/
 
 ## 🌐 Live Preview & Deployment
 
-- 🚀 **Development App**: [Live Development Deployment](https://ais-dev-pxlan37mymxap5cg3c6xtf-335763130583.europe-west2.run.app)
-- 🔗 **Shared Preview**: [Live Staging Preview](https://ais-pre-pxlan37mymxap5cg3c6xtf-335763130583.europe-west2.run.app)
+- 🚀 **Live Demo Deployment**: `Not deployed yet / Coming soon`
+- 📦 **Repository URL**: `https://github.com/<your-username>/meetly`
 
 ---
 
 ## 📄 License & Status
 
-Distributed under the **MIT License**. Verified for full-stack deployment with complete TypeScript type safety and zero linter warnings.
+Distributed under the **MIT License**. Handcrafted full-stack project built with high-performance WebRTC, WebCrypto, React, and Node.js.
