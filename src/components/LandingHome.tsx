@@ -115,17 +115,6 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
         }`}
       />
 
-      {/* Top Editorial Corner Markers */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-6 sm:pt-10">
-        <div className="flex items-center justify-between text-[11px] font-mono opacity-50 pb-4 border-b border-dashed border-slate-300 dark:border-slate-800">
-          <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>PROTOCOL // WEBRTC-MESH-V2</span>
-          </span>
-          <span className="hidden sm:inline">ZERO SERVER RELAY &bull; CLIENT-AUTHORITATIVE</span>
-          <span>LATENCY &lt; 25MS</span>
-        </div>
-      </div>
 
       {/* Main Hero Section */}
       <section className="relative pt-8 pb-16 sm:pt-14 sm:pb-24 overflow-hidden">

@@ -912,7 +912,8 @@ export default function App() {
     localStorage.removeItem('fakka_auth_token');
     localStorage.removeItem('fakka_current_user');
     setCurrentUser(null);
-    setIsAuthModalOpen(true);
+    setCurrentTab('home');
+    setIsAuthModalOpen(false);
   };
 
   // If still checking auth token
@@ -1169,7 +1170,7 @@ export default function App() {
             activeRoomId={activeRoomId}
           />
 
-          <main className="flex-1 pt-15 sm:pt-16">
+          <main className="flex-1">
             {currentTab === 'home' && (
               <LandingHome
                 onJoinRoomFromLanding={(id, pw) => handleJoinRoom(id, pw, false)}

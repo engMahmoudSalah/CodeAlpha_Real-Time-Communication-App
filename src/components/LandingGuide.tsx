@@ -57,17 +57,6 @@ export const LandingGuide: React.FC = () => {
         }`}
       />
 
-      {/* Top Editorial Corner Markers */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-6 sm:pt-10">
-        <div className="flex items-center justify-between text-[11px] font-mono opacity-50 pb-4 border-b border-dashed border-slate-300 dark:border-slate-800">
-          <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>PLAYBOOK // WORKFLOW CHECKS</span>
-          </span>
-          <span className="hidden sm:inline">ZERO-KNOWLEDGE INITIALIZATION</span>
-          <span>MODE // STEPWISE ONBOARDING</span>
-        </div>
-      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-10">
         {/* Header */}

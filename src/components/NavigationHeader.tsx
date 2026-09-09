@@ -48,6 +48,7 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
 
   const menuItems = [
     { id: 'home', label: 'Home', icon: Home },
+    ...(currentUser ? [{ id: 'app', label: activeRoomId ? 'Active Call' : 'Workspace', icon: LayoutDashboard }] : []),
     { id: 'features', label: 'Features', icon: Sparkles },
     { id: 'tech-routes', label: 'Architecture', icon: Cpu },
     { id: 'guide', label: 'User Guide', icon: BookOpen },
@@ -101,12 +102,14 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
     <>
       <header
         id="global-platform-header"
-        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
+        className={`sticky top-0 z-40 w-full transition-all duration-300 ${
           isScrolled
             ? isDark
               ? 'bg-[#0a0e17]/95 border-b border-slate-800/90 text-slate-100 backdrop-blur-md shadow-xs'
               : 'bg-white/95 border-b border-slate-200/90 text-slate-900 backdrop-blur-md shadow-xs'
-            : 'bg-transparent border-b border-transparent text-slate-900 dark:text-slate-100'
+            : isDark
+              ? 'bg-[#0a0e17] border-b border-slate-800/20 text-slate-100'
+              : 'bg-[#fafafc] border-b border-slate-200/20 text-slate-900'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-15 sm:h-16 flex items-center justify-between gap-3">
@@ -180,7 +183,7 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
             <button
               type="button"
               onClick={toggleTheme}
-              className={`p-2 rounded-lg border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
+              className={`h-9 w-9 flex items-center justify-center rounded-lg border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
                 isDark
                   ? 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-300 hover:text-white'
                   : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700'
@@ -195,35 +198,9 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
             <div className="hidden sm:flex items-center gap-2">
               {currentUser ? (
                 <>
-                  {currentTab === 'app' ? (
-                    <button
-                      onClick={() => setCurrentTab('home')}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
-                        isDark
-                          ? 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200'
-                          : 'bg-white hover:bg-slate-50 border-slate-300 text-slate-700'
-                      }`}
-                    >
-                      <AppWindow className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Overview</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setCurrentTab('app')}
-                      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-colors ${
-                        isDark
-                          ? 'bg-white hover:bg-slate-100 text-slate-950'
-                          : 'bg-black hover:bg-slate-800 text-white'
-                      }`}
-                    >
-                      <LayoutDashboard className="w-3.5 h-3.5" />
-                      <span>{activeRoomId ? 'Active Room' : 'Console Lobby'}</span>
-                    </button>
-                  )}
-
                   {/* Profile Capsule */}
                   <div
-                    className={`flex items-center gap-2 pl-2 pr-2.5 py-1 rounded-lg border text-xs font-mono ${
+                    className={`h-9 flex items-center gap-2 px-2.5 rounded-lg border text-xs font-mono ${
                       isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-50 border-slate-300'
                     }`}
                   >
@@ -250,7 +227,7 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
                 <>
                   <button
                     onClick={onOpenAuth}
-                    className={`px-3 py-1.5 rounded-lg border text-xs font-mono font-medium transition-colors ${
+                    className={`h-9 px-4 rounded-lg border text-xs font-mono font-medium transition-colors ${
                       isDark
                         ? 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200'
                         : 'bg-white hover:bg-slate-50 border-slate-300 text-slate-700'
@@ -260,7 +237,7 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
                   </button>
                   <button
                     onClick={onOpenAuth}
-                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-colors ${
+                    className={`h-9 inline-flex items-center gap-1.5 px-4 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-colors ${
                       isDark
                         ? 'bg-white hover:bg-slate-100 text-slate-950'
                         : 'bg-black hover:bg-slate-800 text-white'
@@ -276,7 +253,7 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`p-2.5 rounded-lg border transition-colors lg:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
+              className={`h-9 w-9 flex items-center justify-center rounded-lg border transition-colors lg:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
                 isDark
                   ? 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200'
                   : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-800'
@@ -407,14 +384,7 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <button
-                    onClick={() => handleTabClick('app')}
-                    className="py-3 px-3 bg-black hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 text-xs font-mono font-bold uppercase tracking-wider rounded-xl text-center shadow-xs flex items-center justify-center gap-1.5"
-                  >
-                    <LayoutDashboard className="w-3.5 h-3.5" />
-                    <span>{activeRoomId ? 'Resume Call' : 'Enter Lobby'}</span>
-                  </button>
+                <div className="grid grid-cols-1 gap-2 pt-1">
                   <button
                     onClick={() => {
                       onLogout();

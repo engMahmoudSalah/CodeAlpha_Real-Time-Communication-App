@@ -191,13 +191,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onClose, isOpen
       localStorage.setItem('fakka_current_user', JSON.stringify(user));
       onSuccess(user, `fb_${user.id}`);
     } catch (err: any) {
-      console.error('Google Sign-In Error:', err);
-      if (err.code === 'auth/popup-closed-by-user') {
-        setError('Sign-in cancelled.');
-      } else if (err.code === 'auth/popup-blocked') {
-        setError('Pop-up blocked by browser. Please allow popups or try again.');
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        // User intentionally closed the popup, silently ignore instead of showing an error.
+        setError(null);
       } else {
-        setError(err.message || 'Failed to sign in with Google');
+        console.error('Google Sign-In Error:', err);
+        if (err.code === 'auth/popup-blocked') {
+          setError('Pop-up blocked by browser. Please allow popups or try again.');
+        } else {
+          setError(err.message || 'Failed to sign in with Google');
+        }
       }
     } finally {
       setLoading(false);
