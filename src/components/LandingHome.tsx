@@ -107,10 +107,10 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
   };
 
   return (
-    <div className="w-full relative transition-colors duration-150">
+    <div className="w-full relative overflow-hidden transition-colors duration-150">
       {/* Precision Background Pattern */}
       <div
-        className={`absolute inset-0 pointer-events-none h-[1200px] ${
+        className={`absolute inset-0 pointer-events-none ${
           isDark ? 'bg-tech-grid-dark mask-radial' : 'bg-tech-grid-light mask-radial'
         }`}
       />
@@ -389,83 +389,113 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
 
           {/* Architectural Comparison Matrix */}
           <div
-            className={`max-w-4xl mx-auto rounded-xl border overflow-hidden font-mono text-xs ${
+            className={`max-w-4xl mx-auto rounded-xl border overflow-hidden font-mono text-[10px] sm:text-xs ${
               isDark
                 ? 'bg-slate-950 border-slate-800'
                 : 'bg-white border-slate-200 shadow-xs'
             }`}
           >
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto min-w-full">
+              <table className="w-full text-left border-collapse min-w-[600px]">
                 <thead>
                   <tr
                     className={`border-b ${
                       isDark
-                        ? 'bg-slate-900/80 border-slate-800 text-slate-300'
-                        : 'bg-slate-100 border-slate-200 text-slate-700'
+                        ? 'bg-slate-900/90 border-slate-800 text-slate-200'
+                        : 'bg-slate-100 border-slate-200 text-slate-800'
                     }`}
                   >
                     <th className="py-3 px-4 font-bold">Feature Vector</th>
-                    <th className="py-3 px-4 font-bold text-slate-500">Centralized SFU (Zoom / Meet)</th>
-                    <th className="py-3 px-4 font-bold text-indigo-500 dark:text-cyan-400">
+                    <th className="py-3 px-4 font-bold text-slate-600 dark:text-slate-400">Centralized SFU (Zoom / Meet)</th>
+                    <th className="py-3 px-4 font-bold text-indigo-600 dark:text-cyan-400">
                       Meetly (P2P Mesh)
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-800/80">
-                  <tr>
-                    <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200">
-                      Stream Routing
+                  <tr className="hover:bg-slate-500/5 transition-colors">
+                    <td className="py-3.5 px-4 font-bold text-sky-600 dark:text-sky-400">
+                      <div className="flex items-center gap-2">
+                        <Network className="w-4 h-4 text-sky-500 shrink-0" />
+                        <span>Stream Routing</span>
+                      </div>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500">
+                    <td className="py-3.5 px-4 text-rose-600 dark:text-rose-400 font-medium">
                       Client &rarr; Cloud SFU &rarr; Client
                     </td>
                     <td className="py-3.5 px-4 text-emerald-600 dark:text-emerald-400 font-bold">
-                      Direct Peer ⇄ Peer Mesh
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        <span>Direct Peer ⇄ Peer Mesh</span>
+                      </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200">
-                      Decryption Point
+                  <tr className="hover:bg-slate-500/5 transition-colors">
+                    <td className="py-3.5 px-4 font-bold text-indigo-600 dark:text-indigo-400">
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-indigo-500 shrink-0" />
+                        <span>Decryption Point</span>
+                      </div>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500">
+                    <td className="py-3.5 px-4 text-rose-600 dark:text-rose-400 font-medium">
                       Decrypted on provider cloud servers
                     </td>
                     <td className="py-3.5 px-4 text-emerald-600 dark:text-emerald-400 font-bold">
-                      Endpoint browsers only (WebCrypto AES)
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        <span>Endpoint browsers only (WebCrypto AES)</span>
+                      </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200">
-                      Media Logging & Metadata
+                  <tr className="hover:bg-slate-500/5 transition-colors">
+                    <td className="py-3.5 px-4 font-bold text-amber-600 dark:text-amber-400">
+                      <div className="flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-amber-500 shrink-0" />
+                        <span>Media Logging & Metadata</span>
+                      </div>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500">
+                    <td className="py-3.5 px-4 text-rose-600 dark:text-rose-400 font-medium">
                       Telemetry & recordings logged in cloud
                     </td>
                     <td className="py-3.5 px-4 text-emerald-600 dark:text-emerald-400 font-bold">
-                      0 Bytes stored on server
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        <span>0 Bytes stored on server</span>
+                      </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200">
-                      File & Document Sharing
+                  <tr className="hover:bg-slate-500/5 transition-colors">
+                    <td className="py-3.5 px-4 font-bold text-teal-600 dark:text-teal-400">
+                      <div className="flex items-center gap-2">
+                        <Share2 className="w-4 h-4 text-teal-500 shrink-0" />
+                        <span>File & Document Sharing</span>
+                      </div>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500">
+                    <td className="py-3.5 px-4 text-rose-600 dark:text-rose-400 font-medium">
                       Uploaded to public S3 buckets
                     </td>
                     <td className="py-3.5 px-4 text-emerald-600 dark:text-emerald-400 font-bold">
-                      Chunked point-to-point via DataChannel
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        <span>Chunked point-to-point via DataChannel</span>
+                      </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200">
-                      Authentication Model
+                  <tr className="hover:bg-slate-500/5 transition-colors">
+                    <td className="py-3.5 px-4 font-bold text-violet-600 dark:text-violet-400">
+                      <div className="flex items-center gap-2">
+                        <KeyRound className="w-4 h-4 text-violet-500 shrink-0" />
+                        <span>Authentication Model</span>
+                      </div>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500">
+                    <td className="py-3.5 px-4 text-rose-600 dark:text-rose-400 font-medium">
                       Mandatory user account & tracking
                     </td>
                     <td className="py-3.5 px-4 text-emerald-600 dark:text-emerald-400 font-bold">
-                      Instant Guest or Authenticated
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        <span>Instant Guest or Authenticated</span>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -569,40 +599,6 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
           </div>
         </div>
       </section>
-
-      {/* Concise Engineering Footer */}
-      <footer
-        className={`py-8 border-t text-xs font-mono ${
-          isDark
-            ? 'bg-[#0a0e17] border-slate-800 text-slate-500'
-            : 'bg-slate-50 border-slate-200 text-slate-500'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <MeetlyBrand size="sm" showSubtitle={false} />
-            <span className="text-slate-400 dark:text-slate-600">&bull;</span>
-            <span className="text-slate-500">Decentralized WebRTC Mesh</span>
-          </div>
-          <div className="flex items-center gap-4 text-[11px]">
-            <span>Version 2.4</span>
-            <span>&bull;</span>
-            <button
-              onClick={() => setCurrentTab('tech-routes')}
-              className="text-indigo-500 hover:underline"
-            >
-              Architecture Specs
-            </button>
-            <span>&bull;</span>
-            <button
-              onClick={() => setCurrentTab('guide')}
-              className="text-indigo-500 hover:underline"
-            >
-              Deployment Guide
-            </button>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

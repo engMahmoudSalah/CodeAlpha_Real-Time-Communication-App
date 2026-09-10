@@ -52,7 +52,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
 
   return (
     <div
-      className={`w-full sm:w-80 md:w-96 h-full flex flex-col rounded-xl border shadow-xl z-30 overflow-hidden font-mono transition-colors ${
+      className={`absolute sm:relative inset-y-0 right-0 sm:right-auto z-50 sm:z-30 w-full sm:w-80 md:w-96 h-full flex flex-col rounded-xl border shadow-2xl overflow-hidden font-mono transition-colors ${
         isDark ? 'bg-[#0f1422] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900 shadow-md'
       }`}
     >

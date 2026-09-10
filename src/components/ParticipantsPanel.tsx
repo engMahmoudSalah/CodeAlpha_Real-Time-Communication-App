@@ -49,7 +49,7 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({
 
   return (
     <div
-      className={`w-full sm:w-80 md:w-96 h-full flex flex-col rounded-xl border shadow-xl z-30 overflow-hidden transition-colors ${
+      className={`absolute sm:relative inset-y-0 right-0 sm:right-auto z-50 sm:z-30 w-full sm:w-80 md:w-96 h-full flex flex-col rounded-xl border shadow-2xl overflow-hidden transition-colors ${
         isDark ? 'bg-[#0f1422] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900 shadow-lg'
       }`}
     >
@@ -141,7 +141,11 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center space-x-1.5">
-                    <span className={`text-xs font-mono font-semibold truncate ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                    <span className={`text-xs font-mono font-semibold truncate ${
+                      isMe
+                        ? (isDark ? 'text-indigo-400 font-bold' : 'text-indigo-600 font-bold')
+                        : (isDark ? 'text-slate-200' : 'text-slate-800')
+                    }`}>
                       {p.name}
                     </span>
                     {isMe && (

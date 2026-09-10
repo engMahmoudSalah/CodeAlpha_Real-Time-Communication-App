@@ -76,18 +76,35 @@ export const MeetingControls: React.FC<MeetingControlsProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
   
   const moreMenuRef = useRef<HTMLDivElement>(null);
+  const reactionsRef = useRef<HTMLDivElement>(null);
   const isDark = theme === 'dark';
 
-  // Close more menu when clicking outside
+  // Close menus when clicking outside or pressing Escape
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (moreMenuRef.current && !moreMenuRef.current.contains(target)) {
         setShowMoreMenu(false);
       }
+      if (reactionsRef.current && !reactionsRef.current.contains(target)) {
+        setShowReactions(false);
+      }
     };
-    if (showMoreMenu) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showMoreMenu]);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowMoreMenu(false);
+        setShowReactions(false);
+      }
+    };
+    if (showMoreMenu || showReactions) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showMoreMenu, showReactions]);
 
   return (
     <footer className="absolute bottom-4 sm:bottom-6 left-0 right-0 flex flex-col items-center justify-center px-2 sm:px-4 z-40 w-full pointer-events-none">
@@ -98,7 +115,8 @@ export const MeetingControls: React.FC<MeetingControlsProps> = ({
         {/* Floating Emoji Reactions Tray */}
         {showReactions && !isCollapsed && (
           <div
-            className={`absolute bottom-full mb-3 rounded-xl p-2 shadow-xl flex items-center space-x-1.5 border transition-all animate-in fade-in zoom-in-95 duration-150 z-30 ${
+            ref={reactionsRef}
+            className={`absolute bottom-full mb-3 rounded-2xl p-2 shadow-2xl flex items-center space-x-1.5 border transition-all animate-in fade-in zoom-in-95 duration-150 z-50 ${
               isDark ? 'bg-[#0f1422] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-800'
             }`}
           >
@@ -110,7 +128,7 @@ export const MeetingControls: React.FC<MeetingControlsProps> = ({
                   onSendReaction(emoji);
                   setShowReactions(false);
                 }}
-                className={`text-xl sm:text-2xl p-1.5 sm:p-2 rounded-lg transition-transform hover:scale-125 ${
+                className={`text-xl sm:text-2xl p-1.5 sm:p-2 rounded-xl transition-transform hover:scale-125 ${
                   isDark ? 'hover:bg-slate-850' : 'hover:bg-slate-100'
                 }`}
               >
@@ -122,7 +140,7 @@ export const MeetingControls: React.FC<MeetingControlsProps> = ({
 
         {/* Main Action Bar Dock */}
         <div
-          className={`relative flex items-center justify-center gap-1.5 sm:gap-2 p-2 rounded-2xl border shadow-2xl transition-colors max-w-full overflow-x-visible ${
+          className={`relative flex items-center justify-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-2xl border shadow-2xl transition-colors max-w-[calc(100vw-1rem)] overflow-visible ${
             isDark ? 'bg-[#0f1422]/95 backdrop-blur-xl border-slate-800' : 'bg-white/95 backdrop-blur-xl border-slate-200'
           }`}
         >
@@ -237,11 +255,32 @@ export const MeetingControls: React.FC<MeetingControlsProps> = ({
             </span>
           </button>
 
+          {/* Whiteboard Direct Button */}
+          <button
+            type="button"
+            id="control-toggle-whiteboard"
+            onClick={onToggleWhiteboard}
+            className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl transition-all flex items-center justify-center shrink-0 border ${
+              isWhiteboardOpen
+                ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 shadow-xs ring-2 ring-emerald-500/20'
+                : isDark
+                ? 'bg-slate-900 hover:bg-slate-800 text-slate-100 border-slate-800'
+                : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
+            }`}
+            title={isWhiteboardOpen ? 'Close Whiteboard' : 'Open Whiteboard Canvas'}
+          >
+            <PenTool className="w-4 h-4" />
+          </button>
+
           {/* Reactions Picker */}
           <button
             type="button"
             id="control-toggle-reactions"
-            onClick={() => setShowReactions((prev) => !prev)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowReactions((prev) => !prev);
+              setShowMoreMenu(false);
+            }}
             className={`hidden sm:flex w-10 h-10 sm:w-11 sm:h-11 rounded-xl transition-all items-center justify-center shrink-0 border ${
               showReactions
                 ? 'bg-black text-white dark:bg-white dark:text-slate-950 border-black dark:border-white shadow-xs'
@@ -258,58 +297,90 @@ export const MeetingControls: React.FC<MeetingControlsProps> = ({
           <div className="relative shrink-0" ref={moreMenuRef}>
             <button
               type="button"
-              onClick={() => setShowMoreMenu((prev) => !prev)}
-              className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl transition-all flex items-center justify-center border ${
+              id="control-more-options"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMoreMenu((prev) => !prev);
+                setShowReactions(false);
+              }}
+              className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl transition-all flex items-center justify-center border ${
                 showMoreMenu
-                  ? 'bg-black text-white dark:bg-white dark:text-slate-950 border-black dark:border-white'
+                  ? 'bg-black text-white dark:bg-white dark:text-slate-950 border-black dark:border-white shadow-xs'
                   : isDark
                   ? 'bg-slate-900 hover:bg-slate-800 text-slate-100 border-slate-800'
                   : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
               }`}
-              title="More Options"
+              title="More Options (Whiteboard, Files, Settings)"
             >
               <MoreVertical className="w-4 h-4" />
+              {(isWhiteboardOpen || isFilesOpen) && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-slate-900" />
+              )}
             </button>
 
             {/* Dropup Menu */}
             {showMoreMenu && (
               <div
-                className={`absolute bottom-full right-0 mb-3 w-52 rounded-xl shadow-xl border overflow-hidden transition-all animate-in fade-in slide-in-from-bottom-2 ${
-                  isDark ? 'bg-[#0f1422] border-slate-800' : 'bg-white border-slate-200'
+                id="meeting-more-options-menu"
+                className={`absolute bottom-full right-0 mb-3 w-60 rounded-2xl shadow-2xl border overflow-hidden transition-all animate-in fade-in zoom-in-95 slide-in-from-bottom-2 z-50 ${
+                  isDark ? 'bg-[#0f1422] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
                 }`}
               >
-                <div className="py-1">
+                <div className="p-1.5 space-y-0.5">
                   {/* Whiteboard */}
                   <button
+                    type="button"
+                    id="more-menu-whiteboard"
                     onClick={() => {
                       onToggleWhiteboard();
                       setShowMoreMenu(false);
                     }}
-                    className={`w-full text-left px-4 py-2 text-xs font-mono flex items-center space-x-3 transition-colors ${
-                      isDark ? 'hover:bg-slate-850 text-slate-200' : 'hover:bg-slate-50 text-slate-700'
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-mono flex items-center justify-between transition-colors ${
+                      isWhiteboardOpen
+                        ? isDark ? 'bg-emerald-500/15 text-emerald-400 font-semibold' : 'bg-emerald-50 text-emerald-700 font-semibold'
+                        : isDark ? 'hover:bg-slate-800/70 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
                     }`}
                   >
-                    <PenTool className="w-4 h-4 text-emerald-500" />
-                    <span>Whiteboard Canvas</span>
+                    <div className="flex items-center space-x-2.5">
+                      <PenTool className={`w-4 h-4 ${isWhiteboardOpen ? 'text-emerald-400' : 'text-emerald-500'}`} />
+                      <span>Whiteboard Canvas</span>
+                    </div>
+                    <span className={`px-1.5 py-0.5 text-[10px] font-mono font-bold rounded ${
+                      isWhiteboardOpen
+                        ? 'bg-emerald-500 text-white'
+                        : isDark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'
+                    }`}>
+                      {isWhiteboardOpen ? 'OPEN' : 'P2P'}
+                    </span>
                   </button>
                   
                   {/* Files */}
                   <button
+                    type="button"
+                    id="more-menu-files"
                     onClick={() => {
                       onToggleFiles();
                       setShowMoreMenu(false);
                     }}
-                    className={`w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between transition-colors ${
-                      isDark ? 'hover:bg-slate-850 text-slate-200' : 'hover:bg-slate-50 text-slate-700'
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-mono flex items-center justify-between transition-colors ${
+                      isFilesOpen
+                        ? isDark ? 'bg-amber-500/15 text-amber-400 font-semibold' : 'bg-amber-50 text-amber-700 font-semibold'
+                        : isDark ? 'hover:bg-slate-800/70 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <Share2 className="w-4 h-4 text-amber-500" />
+                    <div className="flex items-center space-x-2.5">
+                      <Share2 className={`w-4 h-4 ${isFilesOpen ? 'text-amber-400' : 'text-amber-500'}`} />
                       <span>Transfers / Files</span>
                     </div>
-                    {filesCount > 0 && (
-                      <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 text-[10px] font-mono font-bold rounded">
+                    {filesCount > 0 ? (
+                      <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-500 text-[10px] font-mono font-bold rounded">
                         {filesCount}
+                      </span>
+                    ) : (
+                      <span className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${
+                        isFilesOpen ? 'bg-amber-500/20 text-amber-500 font-bold' : isDark ? 'text-slate-500' : 'text-slate-400'
+                      }`}>
+                        {isFilesOpen ? 'OPEN' : 'P2P'}
                       </span>
                     )}
                   </button>
@@ -318,12 +389,14 @@ export const MeetingControls: React.FC<MeetingControlsProps> = ({
 
                   {/* Security Info */}
                   <button
+                    type="button"
+                    id="more-menu-security"
                     onClick={() => {
                       onOpenSecurity();
                       setShowMoreMenu(false);
                     }}
-                    className={`w-full text-left px-4 py-2 text-xs font-mono flex items-center space-x-3 transition-colors ${
-                      isDark ? 'hover:bg-slate-850 text-slate-200' : 'hover:bg-slate-50 text-slate-700'
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-mono flex items-center space-x-2.5 transition-colors ${
+                      isDark ? 'hover:bg-slate-800/70 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
                     }`}
                   >
                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
@@ -332,15 +405,17 @@ export const MeetingControls: React.FC<MeetingControlsProps> = ({
 
                   {/* Device Settings */}
                   <button
+                    type="button"
+                    id="more-menu-settings"
                     onClick={() => {
                       onOpenSettings();
                       setShowMoreMenu(false);
                     }}
-                    className={`w-full text-left px-4 py-2 text-xs font-mono flex items-center space-x-3 transition-colors ${
-                      isDark ? 'hover:bg-slate-850 text-slate-200' : 'hover:bg-slate-50 text-slate-700'
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-mono flex items-center space-x-2.5 transition-colors ${
+                      isDark ? 'hover:bg-slate-800/70 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
                     }`}
                   >
-                    <Settings className="w-4 h-4 text-slate-500" />
+                    <Settings className="w-4 h-4 text-slate-400" />
                     <span>Hardware Settings</span>
                   </button>
 
@@ -348,12 +423,14 @@ export const MeetingControls: React.FC<MeetingControlsProps> = ({
 
                   {/* Theme Toggle */}
                   <button
+                    type="button"
+                    id="more-menu-theme"
                     onClick={() => {
                       toggleTheme();
                       setShowMoreMenu(false);
                     }}
-                    className={`w-full text-left px-4 py-2 text-xs font-mono flex items-center space-x-3 transition-colors ${
-                      isDark ? 'hover:bg-slate-850 text-slate-200' : 'hover:bg-slate-50 text-slate-700'
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-mono flex items-center space-x-2.5 transition-colors ${
+                      isDark ? 'hover:bg-slate-850 text-slate-200' : 'hover:bg-slate-100 text-slate-700'
                     }`}
                   >
                     {isDark ? (

@@ -102,7 +102,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onJoinRoom, 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-mono font-bold tracking-tight mb-1">
-            Welcome back, {user.name}
+            Welcome back, <span className="text-indigo-600 dark:text-indigo-400">{user.name}</span>
           </h1>
           <p className={`text-xs sm:text-sm font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
             Manage active sessions, cryptographic tokens, and team invites.

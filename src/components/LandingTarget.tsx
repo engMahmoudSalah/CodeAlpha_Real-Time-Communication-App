@@ -102,10 +102,10 @@ export const LandingTarget: React.FC<LandingTargetProps> = ({ currentUser }) => 
   };
 
   return (
-    <div className="w-full relative transition-colors duration-150">
+    <div className="w-full relative overflow-hidden transition-colors duration-150">
       {/* Precision Background Pattern */}
       <div
-        className={`absolute inset-0 pointer-events-none h-[1200px] ${
+        className={`absolute inset-0 pointer-events-none ${
           isDark ? 'bg-tech-grid-dark mask-radial' : 'bg-tech-grid-light mask-radial'
         }`}
       />

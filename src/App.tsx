@@ -50,6 +50,7 @@ import { LandingFeatures } from './components/LandingFeatures';
 import { LandingTechRoutes } from './components/LandingTechRoutes';
 import { LandingGuide } from './components/LandingGuide';
 import { LandingTarget } from './components/LandingTarget';
+import { Footer } from './components/Footer';
 import { useTheme } from './context/ThemeContext';
 import { Shield, Sparkles, Copy, Check, Radio, ArrowRight, Sun, Moon, Users } from 'lucide-react';
 
@@ -931,7 +932,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-150 ${
+      isDark ? 'bg-[#0a0e17] text-slate-100' : 'bg-[#fafafc] text-slate-900'
+    }`}>
       {/* Authentication Modal */}
       <AuthModal
         isOpen={isAuthModalOpen && !currentUser}
@@ -1158,7 +1161,7 @@ export default function App() {
         </div>
       ) : (
         /* Render global site framework (Header + Navigation pages + Lobby workspace) */
-        <div className={`min-h-screen flex flex-col transition-colors duration-150 ${
+        <div className={`flex-1 w-full flex flex-col transition-colors duration-150 ${
           isDark ? 'bg-[#0a0e17] text-slate-100 font-sans' : 'bg-[#fafafc] text-slate-900 font-sans'
         }`}>
           <NavigationHeader
@@ -1237,6 +1240,15 @@ export default function App() {
               )
             )}
           </main>
+
+          {/* Persistent Landing Page Footer */}
+          {currentTab !== 'app' && (
+            <Footer
+              setCurrentTab={setCurrentTab}
+              currentUser={currentUser}
+              onOpenAuth={() => setIsAuthModalOpen(true)}
+            />
+          )}
         </div>
       )}
 

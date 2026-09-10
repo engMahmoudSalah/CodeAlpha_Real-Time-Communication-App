@@ -103,7 +103,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
   } else if (totalCount === 3) {
     gridClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl';
   } else if (totalCount === 4) {
-    gridClass = 'grid-cols-1 sm:grid-cols-2 max-w-5xl';
+    gridClass = 'grid-cols-2 max-w-5xl';
   } else if (totalCount >= 5 && totalCount <= 6) {
     gridClass = 'grid-cols-2 lg:grid-cols-3 max-w-6xl';
   } else if (totalCount >= 7) {

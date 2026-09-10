@@ -200,17 +200,19 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
                 <>
                   {/* Profile Capsule */}
                   <div
-                    className={`h-9 flex items-center gap-2 px-2.5 rounded-lg border text-xs font-mono ${
-                      isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-50 border-slate-300'
+                    className={`h-9 flex items-center gap-2 px-2.5 rounded-lg border text-xs font-mono transition-colors ${
+                      isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-300 shadow-2xs'
                     }`}
                   >
                     <div
-                      className="w-5 h-5 rounded flex items-center justify-center text-[10px] text-white font-bold"
-                      style={{ backgroundColor: currentUser.avatarColor || '#0f172a' }}
+                      className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] text-white font-bold shrink-0 shadow-xs"
+                      style={{ backgroundColor: currentUser.avatarColor || '#6366f1' }}
                     >
                       {currentUser.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="max-w-[90px] truncate font-medium text-slate-800 dark:text-slate-200">
+                    <span className={`max-w-[140px] truncate font-semibold text-xs transition-colors ${
+                      isDark ? 'text-white' : 'text-slate-900'
+                    }`}>
                       {currentUser.name}
                     </span>
                     <button
@@ -280,7 +282,7 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
       {mobileMenuOpen && (
         <div
           ref={mobileMenuRef}
-          className={`fixed inset-x-0 top-16 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto border-b px-4 py-5 space-y-4 shadow-2xl lg:hidden transition-all animate-in slide-in-from-top-3 duration-200 ${
+          className={`fixed inset-x-0 top-[3.75rem] sm:top-16 z-50 max-h-[calc(100vh-3.75rem)] sm:max-h-[calc(100vh-4rem)] overflow-y-auto border-b px-4 py-5 space-y-4 shadow-2xl lg:hidden transition-all animate-in slide-in-from-top-3 duration-200 ${
             isDark
               ? 'bg-slate-950/95 border-slate-800/90 text-slate-100'
               : 'bg-white/95 border-slate-200 text-slate-900'
@@ -363,13 +365,13 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
                 >
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center text-sm text-white font-bold shadow-xs"
-                    style={{ backgroundColor: currentUser.avatarColor || '#4f46e5' }}
+                    style={{ backgroundColor: currentUser.avatarColor || '#6366f1' }}
                   >
                     {currentUser.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-bold truncate text-slate-900 dark:text-slate-100">
+                      <p className={`text-sm font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
                         {currentUser.name}
                       </p>
                       {currentUser.isGuest && (
