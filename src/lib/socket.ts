@@ -6,7 +6,7 @@ export function getSocket(): Socket {
   if (!socketInstance) {
     // Connect to same origin (handled by Express on port 3000)
     socketInstance = io(window.location.origin, {
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: 10,

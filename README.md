@@ -306,3 +306,13 @@ meetly/
 ## 📄 License & Status
 
 Distributed under the **MIT License**. Handcrafted full-stack project built with high-performance WebRTC, WebCrypto, React, and Node.js.
+
+## Cloudflare deployment (free plan)
+
+The live site https://meetly.mahmodsalah.workers.dev runs without the Express server. `cloudflare/worker.js` is a Cloudflare Worker that provides:
+
+- `/api/auth/*` (guest, register, login, me): signed tokens (HMAC-SHA256), passwords hashed with PBKDF2 and stored in KV
+- `/api/rooms/check/:id` and `/api/health`
+- A Socket.IO v4 compatible WebSocket signaling hub in one Durable Object (rooms, WebRTC offer/answer/ICE relay, chat, whiteboard, file share, reactions, host controls). Rooms live in memory and disappear when everyone leaves.
+
+Email invitations (`/api/invite`) are disabled on this deployment. Deploy with `node cloudflare/deploy-worker.mjs meetly dist` (needs CF_TOKEN, CF_ACCOUNT, KV_ID, WORKER_JS, JWT_FILE).
