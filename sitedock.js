@@ -84,3 +84,76 @@
   function go() { (window.requestIdleCallback || function (f) { setTimeout(f, 800); })(start); }
   if (document.readyState === "complete") go(); else addEventListener("load", go);
 })();
+
+/* Page-level motion: scroll reveal, card tilt, stat count-up, empty-state art, route fade. No assets, honours reduced motion. */
+(function () {
+  if (window.__vis2) return; window.__vis2 = 1;
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, fine = matchMedia("(pointer:fine)").matches;
+  var SEL = "section>*,article,.card,[class*=card],[class*=Card],[class*=tile],[class*=feature],[class*=stat],[class*=plan],[class*=pricing],li[class*=item],tr";
+  function inSD(e) { return e.closest("[data-sitedock],[data-vis]"); }
+  var io = "IntersectionObserver" in window && new IntersectionObserver(function (es) {
+    es.forEach(function (en) { if (!en.isIntersecting) return; var e = en.target; io.unobserve(e); e.style.opacity = e.__o || ""; e.style.transform = e.__t || ""; setTimeout(function () { e.style.transition = e.__tr || ""; }, 700); count(e); });
+  }, { threshold: .06, rootMargin: "0px 0px -4% 0px" });
+  function prep(root) {
+    if (!io) return;
+    var l = (root || document).querySelectorAll(SEL), n = 0;
+    for (var i = 0; i < l.length && n < 160; i++) {
+      var e = l[i]; if (e.__v || inSD(e)) continue; e.__v = 1;
+      var r = e.getBoundingClientRect(), cs = getComputedStyle(e);
+      if (r.width < 60 || r.height < 24 || cs.position === "fixed" || cs.position === "sticky" || cs.display === "none") continue;
+      if (r.top < innerHeight * .95 && r.bottom > 0) { count(e); continue; }
+      n++; e.__o = e.style.opacity; e.__t = e.style.transform; e.__tr = e.style.transition;
+      e.style.opacity = "0"; e.style.transform = "translateY(26px)"; e.style.transition = "opacity .65s ease, transform .65s ease";
+      io.observe(e);
+      (function (x) { setTimeout(function () { if (x.style.opacity === "0") { x.style.opacity = x.__o || ""; x.style.transform = x.__t || ""; } }, 6000); })(e);
+    }
+  }
+  function count(root) {
+    var l = root.querySelectorAll ? root.querySelectorAll("*") : [];
+    for (var i = 0; i < l.length && i < 80; i++) {
+      var e = l[i]; if (e.__c || e.children.length) continue;
+      var t = (e.textContent || "").trim(); if (!/^[\d][\d,.]*[%+kKmM]?$/.test(t) || t.length > 9) continue;
+      var host = e.closest("[class*=stat],[class*=kpi],[class*=metric],[class*=count],[class*=number],[class*=Stat]"); if (!host) continue;
+      e.__c = 1; var num = parseFloat(t.replace(/,/g, "")), suf = t.replace(/^[\d,.]+/, ""), dec = (t.split(".")[1] || "").replace(/\D.*/, "").length, st = performance.now();
+      if (!isFinite(num) || num === 0) continue;
+      (function (el, num, suf, dec, st, orig) {
+        function f(now) { var p = Math.min(1, (now - st) / 1100), v = num * (1 - Math.pow(1 - p, 3)); el.textContent = (dec ? v.toFixed(dec) : Math.round(v).toLocaleString("en-US")) + suf; if (p < 1) requestAnimationFrame(f); else el.textContent = orig; }
+        requestAnimationFrame(f);
+      })(e, num, suf, dec, st, t);
+    }
+  }
+  function tilt() {
+    if (!fine) return; var cur = null;
+    document.addEventListener("pointermove", function (ev) {
+      var c = ev.target.closest && ev.target.closest("[class*=card],[class*=Card],[class*=tile],[class*=plan]");
+      if (cur && cur !== c) { cur.style.transform = cur.__ot || ""; cur.style.transition = cur.__otr || ""; cur = null; }
+      if (!c || inSD(c)) return; var r = c.getBoundingClientRect(); if (r.width > 520 || r.height > 460 || r.width < 120) return;
+      if (cur !== c) { cur = c; c.__ot = c.style.transform; c.__otr = c.style.transition; c.style.transition = "transform .12s ease-out"; }
+      var x = (ev.clientX - r.left) / r.width - .5, y = (ev.clientY - r.top) / r.height - .5;
+      c.style.transform = "perspective(800px) rotateY(" + (x * 5).toFixed(2) + "deg) rotateX(" + (-y * 5).toFixed(2) + "deg)";
+    }, { passive: true });
+    document.addEventListener("pointerleave", function () { if (cur) { cur.style.transform = cur.__ot || ""; cur = null; } }, true);
+  }
+  var ART = '<svg viewBox="0 0 120 90" width="120" height="90" aria-hidden="true" style="display:block;margin:0 auto 10px;opacity:.85"><g style="animation:vf 3.4s ease-in-out infinite"><path d="M20 38l40-18 40 18v34L60 90 20 72z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity=".55"/><path d="M20 38l40 18 40-18M60 56v34" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity=".55"/></g><circle cx="96" cy="16" r="4" fill="currentColor" opacity=".5" style="animation:vf 2.6s ease-in-out infinite"/><circle cx="22" cy="14" r="2.5" fill="currentColor" opacity=".4" style="animation:vf 3s ease-in-out infinite .4s"/></svg>';
+  function empties() {
+    var l = document.querySelectorAll("p,div,span,td,h3,h4"), n = 0;
+    for (var i = 0; i < l.length && n < 4; i++) {
+      var e = l[i]; if (e.__e || e.children.length > 1 || inSD(e)) continue; var t = (e.textContent || "").trim();
+      if (t.length < 6 || t.length > 70 || !/^(no |nothing |you have no|لا (يوجد|توجد)|لم )/i.test(t)) continue;
+      e.__e = 1; if (e.querySelector("svg")) continue; n++;
+      var w = document.createElement("div"); w.setAttribute("data-vis", "1"); w.style.cssText = "text-align:center;color:inherit;pointer-events:none"; w.innerHTML = ART; e.insertBefore(w, e.firstChild); e.style.textAlign = "center";
+    }
+  }
+  function route() {
+    var root = document.getElementById("root"); if (!root || reduce) return;
+    ["pushState", "replaceState"].forEach(function (k) { var o = history[k]; history[k] = function () { var r = o.apply(this, arguments); root.style.transition = "none"; root.style.opacity = ".0"; requestAnimationFrame(function () { root.style.transition = "opacity .35s ease"; root.style.opacity = "1"; setTimeout(function () { root.style.opacity = ""; root.style.transition = ""; }, 400); }); setTimeout(function () { prep(); empties(); }, 250); return r; }; });
+  }
+  function go() {
+    var st = document.createElement("style"); st.textContent = "@keyframes vf{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}@media(prefers-reduced-motion:reduce){[data-vis] *{animation:none!important}}"; document.head.appendChild(st);
+    empties();
+    if (reduce) return;
+    prep(); tilt(); route();
+    var t; new MutationObserver(function () { clearTimeout(t); t = setTimeout(function () { prep(); empties(); }, 350); }).observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.readyState === "complete") setTimeout(go, 900); else addEventListener("load", function () { setTimeout(go, 900); });
+})();
