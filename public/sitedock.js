@@ -27,6 +27,14 @@
     var more = document.createElement("a"); more.href = "/by-mahmoud"; more.textContent = "By Mahmoud: all projects";
     more.style.cssText = "color:" + fg + ";text-decoration:underline;text-underline-offset:3px;";
     n.appendChild(row); n.appendChild(more); document.body.appendChild(n);
+    function pad() {
+      var need = 0, all = document.body.querySelectorAll("*");
+      for (var i = 0; i < all.length && i < 3000; i++) { var e = all[i]; if (n.contains(e)) continue; var cs = getComputedStyle(e); if (cs.position === "fixed" && cs.display !== "none") { var r = e.getBoundingClientRect(); if (r.height > 0 && r.height < 300 && innerHeight - r.bottom < 140) need = Math.max(need, r.height + 40); } }
+      n.style.paddingBottom = (16 + need) + "px";
+    }
+    function last() { if (document.body.lastElementChild !== n && !(document.body.lastElementChild && document.body.lastElementChild.tagName === "SCRIPT" && document.body.lastElementChild.previousElementSibling === n)) document.body.appendChild(n); }
+    pad(); setTimeout(pad, 2500); setTimeout(pad, 6000);
+    new MutationObserver(function () { last(); }).observe(document.body, { childList: true });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(build, 300); }); else setTimeout(build, 300);
 })();
