@@ -1,0 +1,32 @@
+/* Personal footer strip: LinkedIn, GitHub, portfolio + link to /by-mahmoud.html */
+(function () {
+  if (window.__siteDock) return; window.__siteDock = 1;
+  var L = [
+    ["LinkedIn", "https://www.linkedin.com/in/mahmod-salah", '<path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4v11.5H3zM10 9.75h3.8v1.6h.06c.53-1 1.84-2.05 3.79-2.05 4.05 0 4.8 2.66 4.8 6.13v5.77h-4v-5.1c0-1.22-.02-2.78-1.7-2.78-1.7 0-1.96 1.32-1.96 2.69v5.19h-4z"/>'],
+    ["GitHub", "https://github.com/engMahmoudSalah", '<path d="M12 .5a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/>'],
+    ["Portfolio", "https://md.mahmodsalah.workers.dev/", '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 9h-3.1a15 15 0 0 0-1.2-5.2A8 8 0 0 1 18.9 11zM12 4c.9 1.2 1.7 3.2 1.8 7h-3.6C10.3 7.2 11.1 5.2 12 4zM9.4 5.8A15 15 0 0 0 8.2 11H5.1a8 8 0 0 1 4.3-5.2zM5.1 13h3.1c.1 1.9.5 3.7 1.2 5.2A8 8 0 0 1 5.1 13zm5.1 0h3.6c-.1 3.8-.9 5.8-1.8 7-.9-1.2-1.7-3.2-1.8-7zm4.4 5.2c.7-1.5 1.1-3.3 1.2-5.2h3.1a8 8 0 0 1-4.3 5.2z"/>']
+  ];
+  function lum(c) { var m = c.match(/\d+(\.\d+)?/g); if (!m || (m.length > 3 && +m[3] === 0)) return null; return (0.299 * m[0] + 0.587 * m[1] + 0.114 * m[2]) / 255; }
+  function dark() {
+    var els = [document.body, document.documentElement];
+    for (var i = 0; i < els.length; i++) { var l = lum(getComputedStyle(els[i]).backgroundColor); if (l !== null) return l < 0.5; }
+    return matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function build() {
+    if (document.querySelector("[data-sitedock]")) return;
+    var d = dark(), bg = d ? "#0b1220" : "#f1f5f9", fg = d ? "#e2e8f0" : "#1e293b", br = d ? "#334155" : "#cbd5e1", chip = d ? "#172033" : "#ffffff";
+    var n = document.createElement("div"); n.setAttribute("data-sitedock", "1");
+    n.style.cssText = "display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 18px;box-sizing:border-box;width:100%;padding:16px;background:" + bg + ";border-top:1px solid " + br + ";font:600 14px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;direction:ltr;";
+    var row = document.createElement("div"); row.style.cssText = "display:flex;gap:10px;";
+    L.forEach(function (x) {
+      var a = document.createElement("a"); a.href = x[1]; a.target = "_blank"; a.rel = "noopener"; a.title = x[0]; a.setAttribute("aria-label", x[0]);
+      a.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">' + x[2] + "</svg>";
+      a.style.cssText = "display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;border:1px solid " + br + ";background:" + chip + ";color:" + fg + ";text-decoration:none;box-sizing:border-box;";
+      row.appendChild(a);
+    });
+    var more = document.createElement("a"); more.href = "/by-mahmoud"; more.textContent = "By Mahmoud: all projects";
+    more.style.cssText = "color:" + fg + ";text-decoration:underline;text-underline-offset:3px;";
+    n.appendChild(row); n.appendChild(more); document.body.appendChild(n);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(build, 300); }); else setTimeout(build, 300);
+})();
