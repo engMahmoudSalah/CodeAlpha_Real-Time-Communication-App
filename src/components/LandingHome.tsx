@@ -52,6 +52,14 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
   const [joinRoomCode, setJoinRoomCode] = useState('');
   const [joinPassphrase, setJoinPassphrase] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
+  const [recentRooms, setRecentRooms] = useState<string[]>(() => {
+    try { const v = JSON.parse(localStorage.getItem('meetly_recent_rooms') || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string').slice(0, 5) : []; } catch { return []; }
+  });
+  const rememberRoom = (room: string) => {
+    const next = [room, ...recentRooms.filter((r) => r !== room)].slice(0, 5);
+    setRecentRooms(next);
+    try { localStorage.setItem('meetly_recent_rooms', JSON.stringify(next)); } catch { /* storage unavailable */ }
+  };
 
   // Generate an initial random room name
   useEffect(() => {
@@ -79,6 +87,7 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
       }
       onOpenAuth();
     } else {
+      rememberRoom(finalRoom);
       onJoinRoomFromLanding(finalRoom, usePassphrase ? instantPassphrase.trim() : undefined);
     }
   };
@@ -95,6 +104,7 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
       }
       onOpenAuth();
     } else {
+      rememberRoom(finalRoom);
       onJoinRoomFromLanding(finalRoom, joinPassphrase.trim() || undefined);
     }
   };
@@ -325,6 +335,17 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
                           : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
                       }`}
                     />
+                    {recentRooms.length > 0 && (
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5" aria-label="Recent rooms">
+                        <span className="text-[11px] text-slate-500">Recent:</span>
+                        {recentRooms.map((r) => (
+                          <button key={r} type="button" onClick={() => setJoinRoomCode(r)}
+                            className={`font-mono text-[11px] px-2 py-1 rounded-md border ${isDark ? 'border-slate-700 text-slate-300 hover:bg-slate-800' : 'border-slate-300 text-slate-700 hover:bg-slate-100'}`}>
+                            {r}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div>
