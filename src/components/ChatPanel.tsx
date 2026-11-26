@@ -7,7 +7,8 @@ import {
   Smile,
   X,
   Lock,
-  MessageSquare
+  MessageSquare,
+  Download
 } from 'lucide-react';
 
 interface ChatPanelProps {
@@ -38,6 +39,22 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const saveTranscript = () => {
+    const lines = messages.map((m) => {
+      const t = new Date(m.timestamp);
+      const stamp = t.toLocaleString([], { hour12: false });
+      return `[${stamp}] ${m.senderName}: ${(m.decryptedText || m.text || '').replace(/\r?\n/g, ' ')}`;
+    });
+    const url = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\r\n') + '\r\n'], { type: 'text/plain;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'meetly-chat-' + new Date().toISOString().slice(0, 10) + '.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
@@ -58,7 +75,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     >
       {/* Header */}
       <div
-        className={`flex items-center justify-between p-3.5 sm:p-4 border-b ${
+        className={`flex items-center justify-between p-3.5 sm:p-4 pt-12 sm:pt-14 border-b ${
           isDark ? 'border-slate-800 bg-slate-950/60' : 'border-slate-200 bg-slate-50'
         }`}
       >
@@ -77,6 +94,19 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
           </p>
         </div>
 
+        <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={saveTranscript}
+          disabled={messages.length === 0}
+          aria-label="Save chat transcript"
+          title="Save chat transcript"
+          className={`p-1.5 rounded-lg border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+            isDark ? 'text-slate-400 hover:text-white border-slate-800 hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 border-slate-200 hover:bg-slate-100'
+          }`}
+        >
+          <Download className="w-4 h-4" />
+        </button>
         <button
           type="button"
           onClick={onClose}
@@ -87,6 +117,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         >
           <X className="w-4 h-4" />
         </button>
+        </div>
       </div>
 
       {/* Messages List */}
