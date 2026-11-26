@@ -161,6 +161,7 @@ export class Hub {
       }
       case "whiteboard:action": {
         if (!room) return;
+        if (JSON.stringify(d || {}).length > 4000) return;
         if (d.type === "clear") room.wb = []; else { room.wb.push(d); if (room.wb.length > 2000) room.wb.shift(); }
         return this.toRoom(s.room, ev, d, s.sid);
       }
@@ -173,8 +174,9 @@ export class Hub {
       }
       case "file:share": {
         if (!room || !s.user) return;
+        if (typeof d.dataUrl !== "string" || d.dataUrl.length > 6e6) return ack({ success: false, error: "File too large (max about 4 MB)" });
         const f = { id: rid("file"), name: String(d.name || "file").slice(0, 200), size: d.size, type: d.type, senderId: s.user.userId, senderName: s.user.name, dataUrl: d.dataUrl, isEncrypted: !!d.isEncrypted, iv: d.iv, timestamp: Date.now() };
-        room.files.push(f); if (room.files.length > 50) room.files.shift();
+        room.files.push(f); if (room.files.length > 50) room.files.shift(); { let tot = room.files.reduce((n, x) => n + (x.dataUrl ? x.dataUrl.length : 0), 0); while (tot > 2.4e7 && room.files.length > 1) { tot -= room.files[0].dataUrl ? room.files[0].dataUrl.length : 0; room.files.shift(); } }
         this.toRoom(s.room, "file:shared", { id: f.id, name: f.name, size: f.size, type: f.type, senderId: f.senderId, senderName: f.senderName, dataUrl: f.dataUrl, isEncrypted: f.isEncrypted, iv: f.iv, timestamp: f.timestamp });
         return ack({ success: true, fileId: f.id });
       }
