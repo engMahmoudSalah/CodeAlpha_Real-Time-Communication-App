@@ -102,6 +102,18 @@ function createFallbackStream(): MediaStream {
   return stream;
 }
 
+function ElapsedClock({ isDark }: { isDark: boolean }) {
+  const [t0] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => { const id = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(id); }, []);
+  const sec = Math.max(0, Math.floor((now - t0) / 1000));
+  const p = (n: number) => String(n).padStart(2, '0');
+  const txt = (sec >= 3600 ? p(Math.floor(sec / 3600)) + ':' : '') + p(Math.floor((sec % 3600) / 60)) + ':' + p(sec % 60);
+  return (
+    <span role="timer" aria-label={`Meeting time ${txt}`} className={`text-xs font-mono font-semibold px-2.5 py-1 rounded-xl border tabular-nums backdrop-blur-md ${isDark ? 'bg-slate-900/90 text-slate-300 border-slate-700/80' : 'bg-white/95 text-slate-600 border-slate-300'}`}>{txt}</span>
+  );
+}
+
 export default function App() {
   const { theme, toggleTheme } = useTheme();
   const [copiedRoom, setCopiedRoom] = useState(false);
@@ -1009,6 +1021,7 @@ export default function App() {
                 >
                   {copiedRoom ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
+                <ElapsedClock isDark={isDark} />
               </div>
 
               {securityInfo?.isE2EEActive && (
