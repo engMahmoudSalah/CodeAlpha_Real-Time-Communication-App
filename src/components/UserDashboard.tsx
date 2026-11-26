@@ -33,6 +33,18 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onJoinRoom, 
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
+  const [pw, setPw] = useState({ current: '', next: '' });
+  const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const hasApiToken = (() => { try { const t = localStorage.getItem('meetly_auth_token') || ''; return !!t && !t.startsWith('fb_'); } catch { return false; } })();
+  const changePassword = async () => {
+    setPwMsg(null);
+    try {
+      const res = await fetch('/api/auth/password', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('meetly_auth_token') }, body: JSON.stringify(pw) });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || 'Could not change the password');
+      setPw({ current: '', next: '' }); setPwMsg({ ok: true, text: 'Password changed' });
+    } catch (e: any) { setPwMsg({ ok: false, text: e.message || 'Could not change the password' }); }
+  };
   const [inviteMessage, setInviteMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
@@ -235,6 +247,16 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onJoinRoom, 
           </div>
         </div>
       </div>
+
+      {hasApiToken && !user.isGuest && (
+        <div className={`mt-8 max-w-md p-5 rounded-xl border font-mono text-xs space-y-3 ${isDark ? 'bg-[#0f1422] border-slate-800' : 'bg-white border-slate-200'}`}>
+          <h3 className="font-bold text-sm">Account security</h3>
+          <input type="password" autoComplete="current-password" placeholder="Current password" value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} className={`w-full px-3.5 py-2.5 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500/50 ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'}`} />
+          <input type="password" autoComplete="new-password" placeholder="New password (8+ characters)" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} className={`w-full px-3.5 py-2.5 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500/50 ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'}`} />
+          <button onClick={changePassword} disabled={!pw.current || pw.next.length < 8} className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg font-bold">Change password</button>
+          {pwMsg && <p role="status" className={pwMsg.ok ? 'text-emerald-500' : 'text-red-500'}>{pwMsg.text}</p>}
+        </div>
+      )}
 
       {isInviteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs font-mono">

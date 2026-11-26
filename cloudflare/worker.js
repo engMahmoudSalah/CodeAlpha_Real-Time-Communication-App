@@ -74,6 +74,20 @@ export default {
       if ((await pbkdf2(String(b.password), unb64u(u.salt))) !== u.hash) return J({ error: "Invalid email or password" }, 401);
       return J({ token: await sign(env, u), user: pub(u) });
     }
+    if (p === "/api/auth/password") {
+      const me = await verify(env, (req.headers.get("authorization") || "").replace(/^Bearer /, ""));
+      if (!me || me.isGuest) return J({ error: "Sign in with an account to change the password" }, 401);
+      if (await limited(req, "pw", 8, 6e5)) return J({ error: "Too many attempts. Wait a few minutes." }, 429);
+      const raw = await env.USERS.get("u:" + String(me.email || "").toLowerCase()), cur = String(b.current || ""), next = String(b.next || "");
+      if (!raw) return J({ error: "Account not found" }, 404);
+      const u = JSON.parse(raw);
+      if ((await pbkdf2(cur, unb64u(u.salt))) !== u.hash) return J({ error: "Current password is wrong" }, 401);
+      if (next.length < 8 || next.length > 200) return J({ error: "New password needs at least 8 characters" }, 400);
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      u.salt = b64u(salt); u.hash = await pbkdf2(next, salt);
+      await env.USERS.put("u:" + u.email, JSON.stringify(u));
+      return J({ ok: true });
+    }
     if (p === "/api/invite") return J({ error: "Email invitations are not available on this deployment. Copy the room link instead." }, 501);
     return J({ error: "not_found" }, 404);
   },
