@@ -27,6 +27,16 @@ async function pbkdf2(pw, salt) {
 const pub = (u) => ({ id: u.id, name: u.name, email: u.email, avatarColor: u.avatarColor, isGuest: !!u.isGuest });
 const clip = (s, n) => String(s == null ? "" : s).trim().slice(0, n);
 
+async function limited(req, kind, max, winMs) {
+  const ip = req.headers.get("cf-connecting-ip") || "x", win = Math.floor(Date.now() / winMs);
+  const key = new Request("https://rl.invalid/" + kind + "/" + encodeURIComponent(ip) + "/" + win);
+  try {
+    const hit = await caches.default.match(key);
+    const n = (hit ? parseInt(await hit.text(), 10) || 0 : 0) + 1;
+    await caches.default.put(key, new Response(String(n), { headers: { "cache-control": "max-age=" + Math.ceil(winMs / 1000 + 60) } }));
+    return n > max;
+  } catch { return false; }
+}
 export default {
   async fetch(req, env) {
     const url = new URL(req.url), p = url.pathname;
@@ -41,6 +51,7 @@ export default {
     }
     if (req.method !== "POST") return J({ error: "not_found" }, 404);
     let b = {}; try { b = await req.json(); } catch {}
+    if ((p === "/api/auth/login" || p === "/api/auth/register" || p === "/api/auth/guest") && await limited(req, p.split("/").pop(), p.endsWith("guest") ? 40 : 12, 6e5)) return J({ error: "Too many attempts. Wait a few minutes." }, 429);
     if (p === "/api/auth/guest") {
       const name = clip(b.name, 40) || "Guest_" + Math.floor(1000 + Math.random() * 9000);
       const u = { id: rid("gst"), name, email: name.toLowerCase().replace(/\s+/g, "") + "@guest.local", avatarColor: /^#[0-9a-f]{6}$/i.test(b.avatarColor) ? b.avatarColor : "#10b981", isGuest: true };
