@@ -36,6 +36,32 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onJoinRoom, 
   const [pw, setPw] = useState({ current: '', next: '' });
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const hasApiToken = (() => { try { const t = localStorage.getItem('meetly_auth_token') || ''; return !!t && !t.startsWith('fb_'); } catch { return false; } })();
+  const [delAt, setDelAt] = useState<number | null>(null);
+  const [delPw, setDelPw] = useState('');
+  const [delMsg, setDelMsg] = useState('');
+  const authHdr = () => ({ 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('meetly_auth_token') });
+  useEffect(() => {
+    if (!hasApiToken || user.isGuest) return;
+    fetch('/api/auth/me', { headers: authHdr() }).then((r) => r.json()).then((d) => setDelAt(d?.user?.deletionScheduledAt || null)).catch(() => {});
+  }, [user]);
+  const scheduleDelete = async () => {
+    if (!window.confirm('Your account will be deleted in 7 days. You can restore it any time before then. Continue?')) return;
+    setDelMsg('');
+    try {
+      const res = await fetch('/api/auth/delete', { method: 'POST', headers: authHdr(), body: JSON.stringify({ password: delPw }) });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || 'Could not schedule the deletion');
+      setDelAt(d.deletionScheduledAt); setDelPw('');
+    } catch (e: any) { setDelMsg(e.message || 'Could not schedule the deletion'); }
+  };
+  const restoreAccount = async () => {
+    setDelMsg('');
+    try {
+      const res = await fetch('/api/auth/restore', { method: 'POST', headers: authHdr(), body: '{}' });
+      if (!res.ok) throw new Error('Could not restore the account');
+      setDelAt(null);
+    } catch (e: any) { setDelMsg(e.message || 'Could not restore the account'); }
+  };
   const changePassword = async () => {
     setPwMsg(null);
     try {
@@ -255,6 +281,22 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onJoinRoom, 
           <input type="password" autoComplete="new-password" placeholder="New password (8+ characters)" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} className={`w-full px-3.5 py-2.5 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500/50 ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'}`} />
           <button onClick={changePassword} disabled={!pw.current || pw.next.length < 8} className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg font-bold">Change password</button>
           {pwMsg && <p role="status" className={pwMsg.ok ? 'text-emerald-500' : 'text-red-500'}>{pwMsg.text}</p>}
+          <div className={`pt-3 mt-1 border-t space-y-2 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+            <h4 className="font-bold">Delete account</h4>
+            {delAt ? (
+              <>
+                <p className="text-red-500">Scheduled for deletion on {new Date(delAt).toLocaleDateString()}. Restore it before then to keep your account.</p>
+                <button onClick={restoreAccount} className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold">Restore my account</button>
+              </>
+            ) : (
+              <>
+                <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>Deletion happens 7 days after you confirm. You can restore it with one click before then.</p>
+                <input type="password" autoComplete="current-password" placeholder="Confirm with your password" value={delPw} onChange={(e) => setDelPw(e.target.value)} className={`w-full px-3.5 py-2.5 rounded-lg border focus:outline-hidden focus:ring-2 focus:ring-red-500 ${isDark ? 'bg-[#0a0d18] border-slate-700' : 'bg-white border-slate-300'}`} />
+                <button onClick={scheduleDelete} disabled={!delPw} className="px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg font-bold">Delete account</button>
+              </>
+            )}
+            {delMsg && <p role="status" className="text-red-500">{delMsg}</p>}
+          </div>
         </div>
       )}
 

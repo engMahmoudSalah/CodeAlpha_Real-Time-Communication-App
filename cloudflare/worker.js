@@ -24,7 +24,7 @@ async function pbkdf2(pw, salt) {
   const k = await crypto.subtle.importKey("raw", enc.encode(pw), "PBKDF2", false, ["deriveBits"]);
   return b64u(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: 100000 }, k, 256));
 }
-const pub = (u) => ({ id: u.id, name: u.name, email: u.email, avatarColor: u.avatarColor, isGuest: !!u.isGuest });
+const pub = (u) => ({ id: u.id, name: u.name, email: u.email, avatarColor: u.avatarColor, isGuest: !!u.isGuest, deletionScheduledAt: u.delAt || null });
 const clip = (s, n) => String(s == null ? "" : s).trim().slice(0, n);
 
 async function limited(req, kind, max, winMs) {
@@ -47,7 +47,9 @@ export default {
     if (p.startsWith("/api/rooms/check/")) return hub().fetch(new Request("https://hub/check/" + encodeURIComponent(p.split("/").pop().trim().toLowerCase())));
     if (p === "/api/auth/me") {
       const u = await verify(env, (req.headers.get("authorization") || "").replace(/^Bearer /, ""));
-      return u ? J({ user: pub(u) }) : J({ error: "Not authenticated" }, 401);
+      if (!u) return J({ error: "Not authenticated" }, 401);
+      if (!u.isGuest && u.email) { try { const r = await env.USERS.get("u:" + String(u.email).toLowerCase()); if (r) u.delAt = JSON.parse(r).delAt || null; } catch {} }
+      return J({ user: pub(u) });
     }
     if (req.method !== "POST") return J({ error: "not_found" }, 404);
     let b = {}; try { b = await req.json(); } catch {}
@@ -88,16 +90,40 @@ export default {
       await env.USERS.put("u:" + u.email, JSON.stringify(u));
       return J({ ok: true });
     }
+    if (p === "/api/auth/delete" || p === "/api/auth/restore") {
+      const me = await verify(env, (req.headers.get("authorization") || "").replace(/^Bearer /, ""));
+      if (!me || me.isGuest) return J({ error: "Sign in with an account first" }, 401);
+      if (await limited(req, "del", 8, 6e5)) return J({ error: "Too many attempts. Wait a few minutes." }, 429);
+      const raw = await env.USERS.get("u:" + String(me.email || "").toLowerCase());
+      if (!raw) return J({ error: "Account not found" }, 404);
+      const u = JSON.parse(raw);
+      if (p === "/api/auth/restore") { if (u.delAt) { delete u.delAt; await env.USERS.put("u:" + u.email, JSON.stringify(u)); } return J({ ok: true, deletionScheduledAt: null }); }
+      if ((await pbkdf2(String(b.password || ""), unb64u(u.salt))) !== u.hash) return J({ error: "Password is wrong" }, 401);
+      if (!u.delAt) { u.delAt = Date.now() + 7 * 864e5; await env.USERS.put("u:" + u.email, JSON.stringify(u)); }
+      await hub().fetch(new Request("https://hub/schedule-purge?email=" + encodeURIComponent(u.email) + "&at=" + u.delAt));
+      return J({ ok: true, deletionScheduledAt: u.delAt });
+    }
     if (p === "/api/invite") return J({ error: "Email invitations are not available on this deployment. Copy the room link instead." }, 501);
     return J({ error: "not_found" }, 404);
   },
 };
 
 export class Hub {
-  constructor() { this.sockets = new Map(); this.rooms = new Map(); }
+  constructor(state, env) { this.state = state; this.env = env; this.sockets = new Map(); this.rooms = new Map(); }
+  async alarm() {
+    const now = Date.now(); let next = 0;
+    for (const [k, at] of await this.state.storage.list({ prefix: "purge:" })) {
+      const email = k.slice(6);
+      if (at > now) { next = next ? Math.min(next, at) : at; continue; }
+      try { const raw = await this.env.USERS.get("u:" + email); const u = raw ? JSON.parse(raw) : null; if (u && u.delAt && u.delAt <= now) await this.env.USERS.delete("u:" + email); } catch { next = next || now + 36e5; continue; }
+      await this.state.storage.delete(k);
+    }
+    if (next) await this.state.storage.setAlarm(Math.max(next, now + 1000));
+  }
   async fetch(req) {
     const url = new URL(req.url);
     if (url.hostname === "hub") {
+      if (url.pathname === "/schedule-purge") { const at = +url.searchParams.get("at") || 0; if (at) { await this.state.storage.put("purge:" + url.searchParams.get("email"), at); const cur = await this.state.storage.getAlarm(); if (!cur || cur > at) await this.state.storage.setAlarm(Math.max(at, Date.now() + 1000)); } return J({ ok: true }); }
       if (url.pathname === "/health") return J({ status: "ok", activeRooms: this.rooms.size, timestamp: Date.now() });
       const r = this.rooms.get(decodeURIComponent(url.pathname.split("/").pop()));
       return J(r ? { exists: true, name: r.name, participantCount: r.participants.size, hasPassword: !!r.pw } : { exists: false, participantCount: 0, hasPassword: false });
