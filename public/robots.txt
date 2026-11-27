@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://meetly.mahmodsalah.workers.dev/sitemap.xml
