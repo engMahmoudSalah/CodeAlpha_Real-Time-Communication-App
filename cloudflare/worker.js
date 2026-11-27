@@ -197,14 +197,15 @@ export class Hub {
       case "whiteboard:cursor": if (room && s.user) this.toRoom(s.room, ev, { socketId: s.sid, userId: s.user.userId, userName: s.user.name, color: s.user.avatarColor, x: d.x, y: d.y }, s.sid); return;
       case "chat:message": {
         if (!room || !s.user) return;
-        const rec = { id: rid("msg"), roomId: s.room, senderId: s.user.userId, senderName: s.user.name, avatarColor: s.user.avatarColor, text: String(d.text || "").slice(0, 20000), isEncrypted: !!d.isEncrypted, iv: d.iv, timestamp: Date.now() };
+        const nowT = Date.now(); s.cm = (s.cm || []).filter((t) => nowT - t < 10000); if (s.cm.length >= 20) return ack({ success: false, error: "You are sending messages too fast. Slow down." }); s.cm.push(nowT);
+        const rec = { id: rid("msg"), roomId: s.room, senderId: s.user.userId, senderName: s.user.name, avatarColor: s.user.avatarColor, text: String(d.text || "").slice(0, 20000), isEncrypted: !!d.isEncrypted, iv: typeof d.iv === "string" ? d.iv.slice(0, 64) : undefined, timestamp: Date.now() };
         room.chat.push(rec); if (room.chat.length > 300) room.chat.shift();
         this.toRoom(s.room, ev, rec); return ack({ success: true, message: rec });
       }
       case "file:share": {
         if (!room || !s.user) return;
         if (typeof d.dataUrl !== "string" || d.dataUrl.length > 6e6) return ack({ success: false, error: "File too large (max about 4 MB)" });
-        const f = { id: rid("file"), name: String(d.name || "file").slice(0, 200), size: d.size, type: d.type, senderId: s.user.userId, senderName: s.user.name, dataUrl: d.dataUrl, isEncrypted: !!d.isEncrypted, iv: d.iv, timestamp: Date.now() };
+        const f = { id: rid("file"), name: String(d.name || "file").slice(0, 200), size: d.size, type: d.type, senderId: s.user.userId, senderName: s.user.name, dataUrl: d.dataUrl, isEncrypted: !!d.isEncrypted, iv: typeof d.iv === "string" ? d.iv.slice(0, 64) : undefined, timestamp: Date.now() };
         room.files.push(f); if (room.files.length > 50) room.files.shift(); { let tot = room.files.reduce((n, x) => n + (x.dataUrl ? x.dataUrl.length : 0), 0); while (tot > 2.4e7 && room.files.length > 1) { tot -= room.files[0].dataUrl ? room.files[0].dataUrl.length : 0; room.files.shift(); } }
         this.toRoom(s.room, "file:shared", { id: f.id, name: f.name, size: f.size, type: f.type, senderId: f.senderId, senderName: f.senderName, dataUrl: f.dataUrl, isEncrypted: f.isEncrypted, iv: f.iv, timestamp: f.timestamp });
         return ack({ success: true, fileId: f.id });
