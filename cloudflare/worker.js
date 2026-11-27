@@ -8,7 +8,8 @@ const rid = (p) => p + "_" + Date.now() + "_" + Math.random().toString(36).slice
 
 async function hmacKey(env) { return crypto.subtle.importKey("raw", enc.encode(env.JWT_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]); }
 async function sign(env, user) {
-  const body = b64u(enc.encode(JSON.stringify({ ...user, exp: Date.now() + 7 * 864e5 })));
+  const { salt, hash, delAt, ...safe } = user;
+  const body = b64u(enc.encode(JSON.stringify({ ...safe, exp: Date.now() + 7 * 864e5 })));
   const sig = b64u(await crypto.subtle.sign("HMAC", await hmacKey(env), enc.encode(body)));
   return body + "." + sig;
 }
