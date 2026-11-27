@@ -40,6 +40,12 @@ async function limited(req, kind, max, winMs) {
 }
 export default {
   async fetch(req, env) {
+    try { return await this.route(req, env); } catch (e) {
+      const m = String((e && e.message) || e), kv = /KV|limit exceeded|quota/i.test(m);
+      return J({ error: kv ? "Storage is full for today on our free plan. Please try again after 02:00 Cairo time." : "Something went wrong. Please try again." }, kv ? 503 : 500);
+    }
+  },
+  async route(req, env) {
     const url = new URL(req.url), p = url.pathname;
     if (p.startsWith("/socket.io")) return env.HUB.get(env.HUB.idFromName("hub")).fetch(req);
     if (!p.startsWith("/api/")) return env.ASSETS.fetch(req);
