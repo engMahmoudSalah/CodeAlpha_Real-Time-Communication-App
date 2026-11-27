@@ -171,8 +171,10 @@ export class Hub {
           if (d.password) { r.salt = crypto.getRandomValues(new Uint8Array(16)); r.pw = await pbkdf2(String(d.password), r.salt); }
           this.rooms.set(roomId, r);
         }
-        const isHost = r.participants.size === 0 || r.createdBy === user.id;
-        const part = { socketId: s.sid, userId: String(user.id), name: String(user.name || "Guest").slice(0, 40), avatarColor: user.avatarColor || "#6366f1", isHost, isMuted: false, isVideoOff: false, isScreenSharing: false, joinedAt: Date.now() };
+        if (r.participants.size >= 50) return ack({ success: false, error: "This room is full (50 people)" });
+        const uidStr = String(user.id).slice(0, 80), taken = [...r.participants.values()].some((x) => x.userId === uidStr);
+        const isHost = r.participants.size === 0 || (r.createdBy === user.id && !taken);
+        const part = { socketId: s.sid, userId: uidStr, name: String(user.name || "Guest").slice(0, 40), avatarColor: /^#[0-9a-f]{6}$/i.test(String(user.avatarColor || "")) ? user.avatarColor : "#6366f1", isHost, isMuted: false, isVideoOff: false, isScreenSharing: false, joinedAt: Date.now() };
         r.participants.set(s.sid, part); s.room = roomId; s.user = part;
         this.toRoom(roomId, "user:joined", { participant: part }, s.sid);
         return ack({ success: true, isHost, participants: [...r.participants.values()].filter((x) => x.socketId !== s.sid), whiteboardHistory: r.wb, chatHistory: r.chat.slice(-50),
